@@ -9,8 +9,34 @@ namespace WorkerService2
         {
 
         }
+        public delegate int HostBuilderDelegate(IHostBuilder builder);
         public delegate int ConfigureServicesDelegate(IServiceCollection services);
-        public static void RunHost(string[] args, ConfigureServicesDelegate configureServices)
+        public static void RunHost1(string[] args, HostBuilderDelegate configureServices)
+        {
+            IHostBuilder builder = Host.CreateDefaultBuilder(args)
+                .UseWindowsService(options =>
+                {
+                    options.ServiceName = ".NET Joke Service";
+                });
+
+            configureServices(builder);
+
+            IHost host = builder.Build();
+            host.Run();
+        }
+        public static void RunHost2(string[] args, Action<HostBuilderContext, IServiceCollection> configureDelegate)
+        {
+            IHostBuilder builder = Host.CreateDefaultBuilder(args)
+                .UseWindowsService(options =>
+                {
+                    options.ServiceName = ".NET Joke Service";
+                })
+                .ConfigureServices(configureDelegate);
+
+            IHost host = builder.Build();
+            host.Run();
+        }
+        public static void RunHost3(string[] args, ConfigureServicesDelegate configureServices)
         {
             /*IHost host = Host.CreateDefaultBuilder(args)
                 .ConfigureServices(services =>

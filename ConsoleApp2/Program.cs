@@ -1,13 +1,26 @@
-﻿// See https://aka.ms/new-console-template for more information
-using ConsoleApp2;
+﻿using ConsoleApp2;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Configuration;
+using Microsoft.Extensions.Logging.EventLog;
 
-//Console.WriteLine("Hello, World!");
-WorkerService2.Program2.RunHost(args, services =>
+WorkerService2.Program2.RunHost1(args, builder =>
 {
+    builder.ConfigureServices((context, services) =>
+    {
+        LoggerProviderOptions.RegisterProviderOptions<
+            EventLogSettings, EventLogLoggerProvider>(services);
 
-    services.AddSingleton<JokeService>();
-    services.AddHostedService<WindowsBackgroundService>();
+        services.AddSingleton<JokeService>();
+        services.AddHostedService<WindowsBackgroundService>();
+
+        // See: https://github.com/dotnet/runtime/issues/47303
+        services.AddLogging(builder =>
+        {
+            builder.AddConfiguration(
+                context.Configuration.GetSection("Logging"));
+        });
+    });
 
     return 1;
 });
